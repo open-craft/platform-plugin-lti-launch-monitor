@@ -5,7 +5,7 @@ apiVersion: backstage.io/v1alpha1
 kind: ""
 metadata:
   name: 'platform-plugin-lti-launch-monitor'
-  description: "One-line description for README and other doc files."
+  description: "Monitor LTI launched and record it for analytics."
   annotations:
     # The openedx.org/release key is described in OEP-10:
     #   https://open-edx-proposals.readthedocs.io/en/latest/oep-0010-proc-openedx-releases.html
