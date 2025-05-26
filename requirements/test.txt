@@ -25,7 +25,6 @@ code-annotations==2.3.0
     # via -r requirements/test.in
 coverage[toml]==7.8.0
     # via pytest-cov
-django==4.2.21
     # via
     #   -c https://raw.githubusercontent.com/edx/edx-lint/master/edx_lint/files/common_constraints.txt
     #   -r requirements/base.txt
@@ -77,7 +76,7 @@ newrelic==10.12.0
     #   edx-django-utils
 openedx-atlas==0.7.0
     # via -r requirements/base.txt
-openedx-events==10.2.1
+openedx-events @ git+https://github.com/open-craft/openedx-events.git@kshitij/lti-launch-event
     # via -r requirements/base.txt
 packaging==25.0
     # via pytest

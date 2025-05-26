@@ -1,6 +1,6 @@
-.PHONY: clean clean_tox compile_translations coverage diff_cover docs dummy_translations \
+.PHONY: clean clean_tox compile_translations diff_cover dummy_translations \
         extract_translations fake_translations help pii_check pull_translations \
-        quality requirements selfcheck test test-all upgrade compile-requirements validate install_transifex_client
+        selfcheck validate install_transifex_client
 
 .DEFAULT_GOAL := help
 
@@ -32,51 +32,11 @@ docs: ## generate Sphinx HTML documentation, including API docs
 	tox -e docs
 	$(BROWSER)docs/_build/html/index.html
 
-# Define PIP_COMPILE_OPTS=-v to get more information during make upgrade.
-PIP_COMPILE = pip-compile $(PIP_COMPILE_OPTS)
-
-compile-requirements: ## compile the requirements/*.txt files with the latest packages satisfying requirements/*.in
-	pip install -qr requirements/pip-tools.txt
-	pip-compile -v ${COMPILE_OPTS} --allow-unsafe --rebuild -o requirements/pip.txt requirements/pip.in
-	pip-compile -v ${COMPILE_OPTS} -o requirements/pip-tools.txt requirements/pip-tools.in
-	pip install -qr requirements/pip.txt
-	pip install -qr requirements/pip-tools.txt
-	$(PIP_COMPILE) -o requirements/base.txt requirements/base.in
-	$(PIP_COMPILE) -o requirements/test.txt requirements/test.in
-	$(PIP_COMPILE) -o requirements/doc.txt requirements/doc.in
-	$(PIP_COMPILE) -o requirements/quality.txt requirements/quality.in
-	$(PIP_COMPILE) -o requirements/ci.txt requirements/ci.in
-	$(PIP_COMPILE) -o requirements/dev.txt requirements/dev.in
-	# Let tox control the Django version for tests
-	sed '/^[dD]jango==/d' requirements/test.txt > requirements/test.tmp
-	mv requirements/test.tmp requirements/test.txt
-
-upgrade: ## update the requirements/*.txt files with the latest packages satisfying requirements/*.in
-	pip install -qr requirements/pip-tools.txt
-	$(MAKE) compile-requirements COMPILE_OPTS="--upgrade"
-
-quality: ## check coding style with pycodestyle and pylint
-	tox -e quality
-
 pii_check: ## check for PII annotations on all Django models
 	tox -e pii_check
 
-piptools: ## install pinned version of pip-compile and pip-sync
-	pip install -r requirements/pip.txt
-	pip install -r requirements/pip-tools.txt
-
-requirements: clean_tox piptools ## install development environment requirements
-	pip-sync -q requirements/dev.txt requirements/private.*
-
-test: clean ## run tests in the current virtualenv
-	pytest
-
 diff_cover: test ## find diff lines that need test coverage
 	diff-cover coverage.xml
-
-test-all: quality pii_check ## run tests on every supported Python/Django combination
-	tox
-	tox -e docs
 
 validate: quality pii_check test ## run tests and quality checks
 
@@ -87,13 +47,13 @@ selfcheck: ## check that the Makefile is well-formed
 
 extract_translations: ## extract strings to be translated, outputting .mo files
 	rm -rf docs/_build
-	cd platform_plugin_lti_launch_monitor && i18n_tool extract --no-segment
+	cd lti_launch_monitor && i18n_tool extract --no-segment
 
 compile_translations: ## compile translation files, outputting .po files for each supported language
-	cd platform_plugin_lti_launch_monitor && i18n_tool generate
+	cd lti_launch_monitor && i18n_tool generate
 
 detect_changed_source_translations:
-	cd platform_plugin_lti_launch_monitor && i18n_tool changed
+	cd lti_launch_monitor && i18n_tool changed
 
 ifeq ($(OPENEDX_ATLAS_PULL),)
 pull_translations: ## Pull translations from Transifex
@@ -101,15 +61,15 @@ pull_translations: ## Pull translations from Transifex
 else
 # Experimental: OEP-58 Pulls translations using atlas
 pull_translations:
-	find platform_plugin_lti_launch_monitor/conf/locale -mindepth 1 -maxdepth 1 -type d -exec rm -r {} \;
-	atlas pull $(OPENEDX_ATLAS_ARGS) translations/platform-plugin-lti-launch-monitor/platform_plugin_lti_launch_monitor/conf/locale:platform_plugin_lti_launch_monitor/conf/locale
+	find lti_launch_monitor/conf/locale -mindepth 1 -maxdepth 1 -type d -exec rm -r {} \;
+	atlas pull $(OPENEDX_ATLAS_ARGS) translations/platform-plugin-lti-launch-monitor/lti_launch_monitor/conf/locale:lti_launch_monitor/conf/locale
 	python manage.py compilemessages
 
 	@echo "Translations have been pulled via Atlas and compiled."
 endif
 
 dummy_translations: ## generate dummy translation (.po) files
-	cd platform_plugin_lti_launch_monitor && i18n_tool dummy
+	cd lti_launch_monitor && i18n_tool dummy
 
 build_dummy_translations: extract_translations dummy_translations compile_translations ## generate and compile dummy translation files
 
