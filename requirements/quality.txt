@@ -105,7 +105,7 @@ newrelic==10.12.0
     #   edx-django-utils
 openedx-atlas==0.7.0
     # via -r requirements/test.txt
-openedx-events @ git+https://github.com/open-craft/openedx-events.git@kshitij/lti-launch-event
+openedx-events==10.4.0
     # via -r requirements/test.txt
 packaging==25.0
     # via
